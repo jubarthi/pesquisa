@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pesquisa de Satisfação · Jubarthi</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:   #4A90D9;
+      --blue-l: #EBF4FF;
+      --green:  #4CAF8A;
+      --lilac:  #9B8EC4;
+      --lilac-l:#F3F0FF;
+      --gray1:  #F7F8FA;
+      --gray2:  #E8EBF0;
+      --gray3:  #9AA3B2;
+      --gray4:  #5C6374;
+      --dark:   #1C2333;
+      --white:  #FFFFFF;
+      --radius: 20px;
+      --shadow: 0 4px 24px rgba(74,144,217,.10);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background: linear-gradient(160deg, #EBF4FF 0%, #F3F0FF 50%, #E8F7F2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 560px;
+      overflow: hidden;
+      animation: fadeUp .4s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--lilac) 100%);
+      padding: 28px 32px 22px;
+      color: var(--white);
+    }
+    .logo { font-size: 13px; font-weight: 600; letter-spacing: .12em; opacity: .85; text-transform: uppercase; }
+    .header-title { font-size: 22px; font-weight: 700; margin-top: 6px; line-height: 1.3; }
+    .header-sub { font-size: 13px; opacity: .80; margin-top: 4px; }
+
+    /* ── Progress ── */
+    .progress-wrap {
+      padding: 16px 32px 0;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--gray3);
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 5px;
+      background: var(--gray2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--lilac));
+      border-radius: 99px;
+      transition: width .5s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    /* ── Chat area ── */
+    .chat {
+      padding: 24px 32px;
+      min-height: 220px;
+    }
+
+    /* Bot bubble */
+    .bubble-bot {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      margin-bottom: 18px;
+      animation: bubbleIn .3s ease;
+    }
+    .avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--lilac));
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .bot-text {
+      background: var(--gray1);
+      border-radius: 18px 18px 18px 4px;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: var(--dark);
+      line-height: 1.5;
+      max-width: 86%;
+    }
+
+    /* Typing indicator */
+    .typing { display: flex; align-items: center; gap: 4px; padding: 14px 16px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gray3); animation: bounce .9s infinite; }
+    .dot:nth-child(2) { animation-delay: .15s; }
+    .dot:nth-child(3) { animation-delay: .30s; }
+    @keyframes bounce { 0%,80%,100% { transform: scale(1); opacity:.5; } 40% { transform: scale(1.4); opacity:1; } }
+
+    @keyframes bubbleIn {
+      from { opacity:0; transform: translateX(-8px); }
+      to   { opacity:1; transform: translateX(0); }
+    }
+
+    /* User reply */
+    .bubble-user {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 14px;
+      animation: bubbleInR .3s ease;
+    }
+    .user-text {
+      background: linear-gradient(135deg, var(--blue), #6BAEE8);
+      color: var(--white);
+      border-radius: 18px 18px 4px 18px;
+      padding: 10px 16px;
+      font-size: 14px;
+      max-width: 78%;
+      line-height: 1.4;
+    }
+    @keyframes bubbleInR {
+      from { opacity:0; transform: translateX(8px); }
+      to   { opacity:1; transform: translateX(0); }
+    }
+
+    /* ── Input area ── */
+    .input-area {
+      padding: 0 32px 28px;
+    }
+
+    /* Text input */
+    .text-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .text-input {
+      flex: 1;
+      border: 1.5px solid var(--gray2);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: var(--dark);
+      outline: none;
+      transition: border-color .2s;
+      resize: none;
+      font-family: inherit;
+      background: var(--gray1);
+      min-height: 48px;
+      max-height: 120px;
+    }
+    .text-input:focus { border-color: var(--blue); background: var(--white); }
+    .send-btn {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--lilac));
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform .15s, opacity .15s;
+    }
+    .send-btn:hover { transform: scale(1.05); }
+    .send-btn:active { transform: scale(.96); opacity:.85; }
+    .send-btn svg { width: 20px; height: 20px; fill: white; }
+
+    /* Options (chips) */
+    .options-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .option-btn {
+      background: var(--gray1);
+      border: 1.5px solid var(--gray2);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: var(--gray4);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .option-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--blue-l);
+    }
+
+    /* Star / scale */
+    .scale-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+    .scale-btn {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      border: 1.5px solid var(--gray2);
+      background: var(--gray1);
+      font-size: 15px; font-weight: 600;
+      color: var(--gray4);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .scale-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-l); }
+
+    /* NPS */
+    .nps-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nps-btn {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      border: 1.5px solid var(--gray2);
+      background: var(--gray1);
+      font-size: 14px; font-weight: 600;
+      color: var(--gray4);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .nps-btn:hover { transform: scale(1.08); }
+    .nps-0,.nps-1,.nps-2,.nps-3,.nps-4,.nps-5,.nps-6 { }
+    .nps-7,.nps-8 { }
+    .nps-9,.nps-10 { }
+
+    /* Success screen */
+    .success {
+      padding: 48px 32px;
+      text-align: center;
+      animation: fadeUp .5s ease;
+    }
+    .success-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), #7ECDB0);
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+    }
+    .success-title { font-size: 22px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+    .success-sub { font-size: 15px; color: var(--gray3); line-height: 1.6; }
+
+    /* Utility */
+    .hidden { display: none !important; }
+
+    @media (max-width: 480px) {
+      .header { padding: 22px 22px 18px; }
+      .chat { padding: 18px 22px; }
+      .input-area { padding: 0 22px 22px; }
+      .progress-wrap { padding: 14px 22px 0; }
+      .scale-btn { width: 38px; height: 38px; font-size: 13px; }
+      .nps-btn { width: 34px; height: 34px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="card">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">Jubarthi · Marketing Médico</div>
+    <div class="header-title">Pesquisa de Satisfação</div>
+    <div class="header-sub">Leva menos de 2 minutos · Suas respostas são confidenciais</div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-meta">
+      <span id="stepLabel">Iniciando...</span>
+      <span id="stepCount">0 / 15</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat" id="chat"></div>
+
+  <!-- Input -->
+  <div class="input-area" id="inputArea"></div>
+
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzk2lJ-goijHamkxn0k-hRU0RG3xU4G0QudCSYbIJwjUHYKxIxzcl4gCx-bkeJuwEvm/exec";
+// ────────────────────────────────────────────────────────────────────────────
+
+const answers = {};
+let currentStep = 0;
+
+const STEPS = [
+  // 0-3: Cadastro
+  {
+    key: "nome",
+    msg: "👋 Olá! Sou o assistente da <strong>Jubarthi</strong>. Fico feliz em ter você aqui.<br><br>Vamos começar pelo seu nome completo:",
+    type: "text",
+    placeholder: "Seu nome completo",
+    label: "Nome"
+  },
+  {
+    key: "especialidade",
+    msg: (a) => `Prazer, <strong>${a.nome}</strong>! 😊<br><br>Qual é a sua especialidade médica? (Se não for médico, escreva sua função ou área)`,
+    type: "text",
+    placeholder: "Ex: Cardiologista, Dermatologista, Gestor...",
+    label: "Especialidade"
+  },
+  {
+    key: "email",
+    msg: "Perfeito! Agora me informe seu <strong>e-mail</strong> para contato:",
+    type: "text",
+    placeholder: "seuemail@exemplo.com",
+    label: "E-mail"
+  },
+  {
+    key: "whatsapp",
+    msg: "E seu <strong>WhatsApp</strong> com DDD:",
+    type: "text",
+    placeholder: "(11) 99999-9999",
+    label: "WhatsApp"
+  },
+  // 4: como chegou
+  {
+    key: "como_chegou",
+    msg: "Ótimo! Agora vamos para as perguntas. São rápidas, prometo. 🙂<br><br>Como você chegou até a <strong>Jubarthi</strong>?",
+    type: "options",
+    options: ["Indicação de colega", "Redes sociais", "Google / pesquisa", "Evento ou congresso", "LinkedIn", "Outro"]
+  },
+  // 5-11: escala 1-5
+  {
+    key: "servico_prometido",
+    msg: "O serviço contratado <strong>atendeu o que foi prometido</strong>?<br><span style='font-size:13px;color:#9AA3B2'>1 = Muito abaixo · 5 = Superou expectativas</span>",
+    type: "scale",
+    labels: ["1","2","3","4","5"]
+  },
+  {
+    key: "qualidade_atendimento",
+    msg: "Como você avalia a <strong>qualidade do atendimento</strong> da equipe Jubarthi?<br><span style='font-size:13px;color:#9AA3B2'>1 = Ruim · 5 = Excelente</span>",
+    type: "scale",
+    labels: ["1","2","3","4","5"]
+  },
+  {
+    key: "facilidade_contato",
+    msg: "Como foi a <strong>facilidade de contato e responsividade</strong> da equipe?<br><span style='font-size:13px;color:#9AA3B2'>1 = Muito difícil · 5 = Sempre disponível</span>",
+    type: "scale",
+    labels: ["1","2","3","4","5"]
+  },
+  {
+    key: "clareza_relatorios",
+    msg: "A <strong>clareza dos relatórios e informações</strong> entregues foi:",
+    type: "scale",
+    labels: ["1","2","3","4","5"]
+  },
+  {
+    key: "cumprimento_prazos",
+    msg: "Como avalia o <strong>cumprimento dos prazos</strong> acordados?",
+    type: "scale",
+    labels: ["1","2","3","4","5"]
+  },
+  {
+    key: "qualidade_servicos",
+    msg: "A <strong>qualidade dos conteúdos e serviços entregues</strong> foi:",
+    type: "scale",
+    labels: ["1","2","3","4","5"]
+  },
+  {
+    key: "custo_beneficio",
+    msg: "Como você avalia a <strong>relação custo-benefício</strong> dos serviços da Jubarthi?",
+    type: "scale",
+    labels: ["1","2","3","4","5"]
+  },
+  // 12: NPS
+  {
+    key: "nps",
+    msg: "Numa escala de <strong>0 a 10</strong>, qual a probabilidade de você <strong>recomendar a Jubarthi</strong> para um colega médico?<br><span style='font-size:13px;color:#9AA3B2'>0 = Jamais recomendaria · 10 = Com certeza recomendaria</span>",
+    type: "nps"
+  },
+  // 13: intenção
+  {
+    key: "intencao_continuar",
+    msg: "Você pretende <strong>continuar ou expandir</strong> os serviços com a Jubarthi?",
+    type: "options",
+    options: ["Sim, com certeza", "Provavelmente sim", "Ainda estou avaliando", "Provavelmente não"]
+  },
+  // 14: comentário aberto
+  {
+    key: "comentario",
+    msg: "Última pergunta! 🎉<br><br>Quer deixar algum <strong>comentário, elogio ou sugestão</strong> para a nossa equipe? (opcional)",
+    type: "textarea",
+    placeholder: "Escreva aqui à vontade... (pode deixar em branco se preferir)",
+    label: "Comentário",
+    optional: true
+  }
+];
+
+const TOTAL = STEPS.length;
+
+// ── UI helpers ───────────────────────────────────────────────────────────────
+const chat      = document.getElementById("chat");
+const inputArea = document.getElementById("inputArea");
+
+function updateProgress(step) {
+  const pct = Math.round((step / TOTAL) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("stepCount").textContent = step + " / " + TOTAL;
+  document.getElementById("stepLabel").textContent =
+    step === 0 ? "Vamos começar" :
+    step < 4 ? "Cadastro" :
+    step < 14 ? "Pesquisa de satisfação" : "Finalizando";
+}
+
+function addBotBubble(html, cb) {
+  // typing indicator
+  const typing = document.createElement("div");
+  typing.className = "bubble-bot";
+  typing.innerHTML = `<div class="avatar">🐋</div><div class="bot-text"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  chat.appendChild(typing);
+  scrollChat();
+
+  setTimeout(() => {
+    typing.remove();
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-bot";
+    bubble.innerHTML = `<div class="avatar">🐋</div><div class="bot-text">${html}</div>`;
+    chat.appendChild(bubble);
+    scrollChat();
+    if (cb) cb();
+  }, 700 + Math.random() * 300);
+}
+
+function addUserBubble(text) {
+  const b = document.createElement("div");
+  b.className = "bubble-user";
+  b.innerHTML = `<div class="user-text">${escHtml(text)}</div>`;
+  chat.appendChild(b);
+  scrollChat();
+}
+
+function scrollChat() {
+  chat.scrollTop = chat.scrollHeight;
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function clearInput() { inputArea.innerHTML = ""; }
+
+// ── Render inputs ────────────────────────────────────────────────────────────
+function renderInput(step) {
+  const s = STEPS[step];
+  clearInput();
+
+  if (s.type === "text" || s.type === "textarea") {
+    const wrap = document.createElement("div");
+    wrap.className = "text-wrap";
+
+    const inp = document.createElement(s.type === "textarea" ? "textarea" : "input");
+    inp.className = "text-input";
+    inp.placeholder = s.placeholder || "";
+    inp.rows = s.type === "textarea" ? 3 : 1;
+
+    const btn = document.createElement("button");
+    btn.className = "send-btn";
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
+
+    const submit = () => {
+      const val = inp.value.trim();
+      if (!val && !s.optional) return;
+      advance(s.key, val || "(sem comentário)");
+    };
+
+    btn.addEventListener("click", submit);
+    inp.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } });
+
+    wrap.appendChild(inp);
+    wrap.appendChild(btn);
+    inputArea.appendChild(wrap);
+    setTimeout(() => inp.focus(), 100);
+
+  } else if (s.type === "options") {
+    const wrap = document.createElement("div");
+    wrap.className = "options-wrap";
+    s.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => advance(s.key, opt));
+      wrap.appendChild(btn);
+    });
+    inputArea.appendChild(wrap);
+
+  } else if (s.type === "scale") {
+    const wrap = document.createElement("div");
+    wrap.className = "scale-wrap";
+    s.labels.forEach(lbl => {
+      const btn = document.createElement("button");
+      btn.className = "scale-btn";
+      btn.textContent = lbl;
+      btn.addEventListener("click", () => advance(s.key, lbl));
+      wrap.appendChild(btn);
+    });
+    inputArea.appendChild(wrap);
+
+  } else if (s.type === "nps") {
+    const wrap = document.createElement("div");
+    wrap.className = "nps-wrap";
+    for (let i = 0; i <= 10; i++) {
+      const btn = document.createElement("button");
+      btn.className = `nps-btn`;
+      btn.textContent = i;
+      // color hint
+      if (i <= 6)  btn.style.cssText = "border-color:#FFCDD2;color:#C62828;background:#FFF8F8";
+      else if (i <= 8) btn.style.cssText = "border-color:#FFE0B2;color:#E65100;background:#FFFBF5";
+      else         btn.style.cssText = "border-color:#C8E6C9;color:#2E7D32;background:#F5FFF6";
+      btn.addEventListener("click", () => advance(s.key, String(i)));
+      wrap.appendChild(btn);
+    }
+    inputArea.appendChild(wrap);
+  }
+}
+
+// ── Main flow ────────────────────────────────────────────────────────────────
+function advance(key, value) {
+  answers[key] = value;
+  addUserBubble(value);
+  clearInput();
+  currentStep++;
+  updateProgress(currentStep);
+
+  if (currentStep >= TOTAL) {
+    sendData();
+    return;
+  }
+
+  const s = STEPS[currentStep];
+  const msg = typeof s.msg === "function" ? s.msg(answers) : s.msg;
+  addBotBubble(msg, () => renderInput(currentStep));
+}
+
+function start() {
+  updateProgress(0);
+  const s = STEPS[0];
+  addBotBubble(s.msg, () => renderInput(0));
+}
+
+// ── Send to Google Sheets ────────────────────────────────────────────────────
+function sendData() {
+  document.getElementById("progressWrap").classList.add("hidden");
+  clearInput();
+
+  addBotBubble("Perfeito! Estamos registrando suas respostas... ⏳");
+
+  setTimeout(() => {
+    if (SCRIPT_URL === "COLE_AQUI_A_URL_DO_APPS_SCRIPT") {
+      showSuccess(); return; // dev mode sem URL
+    }
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(answers)
+    })
+    .then(() => showSuccess())
+    .catch(() => showSuccess());
+  }, 1200);
+}
+
+function showSuccess() {
+  document.getElementById("chat").classList.add("hidden");
+  document.getElementById("inputArea").classList.add("hidden");
+
+  const s = document.createElement("div");
+  s.className = "success";
+  s.innerHTML = `
+    <div class="success-icon">✅</div>
+    <div class="success-title">Obrigado pela sua avaliação!</div>
+    <div class="success-sub">Suas respostas foram registradas com sucesso.<br>A equipe <strong>Jubarthi</strong> agradece sua confiança e continuará trabalhando para superar suas expectativas. 💙</div>
+  `;
+  document.getElementById("card").appendChild(s);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+start();
+</script>
+</body>
+</html>
