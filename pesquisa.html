@@ -304,7 +304,7 @@
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzk2lJ-goijHamkxn0k-hRU0RG3xU4G0QudCSYbIJwjUHYKxIxzcl4gCx-bkeJuwEvm/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMlYO-TWfIczliD-Iundc2AWW8cyRtBr2a3jTEaa_Z-ggeeH18cHaYu8t2YJV769LO/exec";
 // ────────────────────────────────────────────────────────────────────────────
 
 const answers = {};
@@ -577,14 +577,12 @@ function sendData() {
     if (SCRIPT_URL === "COLE_AQUI_A_URL_DO_APPS_SCRIPT") {
       showSuccess(); return; // dev mode sem URL
     }
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(answers)
-    })
-    .then(() => showSuccess())
-    .catch(() => showSuccess());
+    const params = new URLSearchParams(answers).toString();
+    const img = new Image();
+    img.src = SCRIPT_URL + "?" + params;
+    img.onload = showSuccess;
+    img.onerror = showSuccess;
+    setTimeout(showSuccess, 3000);
   }, 1200);
 }
 
